@@ -57,7 +57,7 @@ end
 mfield = igrf11magm(h, lat, lon, data.MagDamping.Y)/1e9;
 
 %--- Max torque ---%
-Tmax = abs(cross(mfield,data.MagDamping.A));
+Tmax = abs(cross(data.MagDamping.A,mfield));
 
 %--- Desired torque ---%
 Tdes = -(y(11:13)-data.MagDamping.w')*data.MagDamping.c;
@@ -65,17 +65,17 @@ Tdes = -(y(11:13)-data.MagDamping.w')*data.MagDamping.c;
 %--- Real Torque ---%
 T=Tdes;
 %Check if desired Torque is not bigger than the max
-if T(1)>Tmax(1)
+if abs(T(1))>Tmax(1)
     %Actuator saturated
     if data.MagDamping.verb; disp('X actuator saturating'); end;
     T(1)=sign(T(1))*Tmax(1);
 end
-if T(2)>Tmax(2)
+if abs(T(2))>Tmax(2)
     %Actuator saturated
     if data.MagDamping.verb; disp('Y actuator saturating'); end
     T(2)=sign(T(2))*Tmax(2);
 end
-if T(3)>Tmax(3)
+if abs(T(3))>Tmax(3)
     %Actuator saturated
     if data.MagDamping.verb; disp('Z actuator saturating'); end
     T(3)=sign(T(3))*Tmax(3);
