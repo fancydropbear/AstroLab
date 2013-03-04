@@ -54,7 +54,10 @@ elseif lon<-180
 end
 
 %Magnetic field in T
-mfield = igrf11magm(h, lat, lon, data.MagDamping.Y)/1e9;
+mfield_ECEF = igrf11magm(h, lat, lon, data.MagDamping.Y)/1e9;
+%Change magnetic field to body axes.
+DCM = quat2dcm([y(10),y(7:9)']);
+mfield = DCM*mfield_ECEF';
 
 %--- Max torque ---%
 Tmax = abs(cross(data.MagDamping.A,mfield));
