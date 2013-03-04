@@ -69,6 +69,7 @@ data.models(end+1)={@AeroTDBCoWind};
 data.models(end+1)={@MagDamping};
 data.models(end+1)={@SrpTorque};
 data.models(end+1)={@MagRollControl};
+data.models(end+1)={@GravityGradient};
 
 %Configure AeroFDBCoWind
 FP_rolldb=load(rolldb_FP);

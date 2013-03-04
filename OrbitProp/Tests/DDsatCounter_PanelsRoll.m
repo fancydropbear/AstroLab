@@ -70,6 +70,7 @@ data.models(end+1)={@SrpAccel};
 data.models(end+1)={@AeroTDBCoWind};
 data.models(end+1)={@MagDamping};
 data.models(end+1)={@SrpTorque};
+data.models(end+1)={@GravityGradient};
 %data.models(end+1)={@MagRollControl};
 
 %Configure AeroFDBCoWind
