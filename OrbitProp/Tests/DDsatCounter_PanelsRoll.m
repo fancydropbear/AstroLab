@@ -367,3 +367,108 @@ xlabel('Time [min]')
 ylabel('Density ratio')
 title('Observed / real density')
 
+%--- Magnetic Torque ---%
+%Calculate Torque
+Torque=[];
+for i=1:length(t)
+ [A,Torque(end+1,1:3),E] = MagDamping(t(i),x(i,:)',data);
+end
+
+%Torque plot
+figure
+plot(t/60,Torque(:,1),t/60,Torque(:,2),t/60,Torque(:,3))
+xlabel('Time [mins]');
+ylabel('Torque [Nm]');
+legend('x Torquer','y Torquer','z Torquer');
+title('Torque Plot');
+
+%--- Power & Energy Plots ---%
+Al = []; %Actuation level
+PT = []; %Total Power
+PP = []; %Partial Power
+% Power per actuation level Am2 of actuators (parameter that needs
+% adjusting to every case)
+px = 0.57/0.2;
+py = 0.2/0.2;
+pz = 0.2/0.2;
+p = [px,py,pz];
+
+for i=1:length(t)
+    %--- Get magnetic field ---%
+    %Latitude and longitude
+    we = 7.292115e-5; %Earth Angular velocity in rad/s [source: SMAD 3rd edition]
+    Req=6378136.49;   %Equatorial Earth radius m [source: SMAD 3rd edition]
+    f=1/298.256;      %Flattening factor [source: SMAD 3rd edition]
+    lla=ecef2lla(x(i,1:3),f,Req); %Compute taking assuming Earth as an ellipsoid
+    lat=lla(1);
+    lon=lla(2);
+    h=lla(3);
+    %Take into account rotation of the earth
+    lon = mod(lon - t(i)*we*180/pi,365);
+    if lon>180
+        lon = lon-360;
+    elseif lon<-180
+        lon = lon+360;
+    end
+    
+    %Magnetic field in T
+    mfield_ECEF = igrf11magm(h, lat, lon, data.MagDamping.Y)/1e9;
+    %Change magnetic field to body axes.
+    DCM = quat2dcm([x(i,10),x(i,7:9)]);
+    mfield = DCM*mfield_ECEF';
+    
+    %Preliminary actuation levels m_p
+    m_p=(cross(mfield,Torque(i,:))/norm(mfield)^2)';
+    %Check different scalar values
+    k_max=(data.MagDamping.A'-m_p)./mfield; %Scalar value for maximum actuation level on one axis
+    k_min=(-data.MagDamping.A'-m_p)./mfield; %Scalar value for minus maximum actuation level on one axis
+    k_0=-m_p./mfield; %Scalar value for 0 actuation level on one axis
+    
+    %Scan through the different scalar values
+    err=1e-3/100;
+    m_v=[];
+    p_v=[];
+    for k=[k_max',k_min',k_0']
+        m=m_p+k*mfield;
+        
+        if abs(m(1))>data.MagDamping.A(1)*(1+err)
+            %Solution is not real
+            continue
+        end
+        if abs(m(2))>data.MagDamping.A(2)*(1+err)
+            %Solution is not real
+            continue
+        end
+        if abs(m(3))>data.MagDamping.A(3)*(1+err)
+            %Solution is not real
+            continue
+        end
+        
+       m_v(end+1,1:3) = m;
+       p_v(end+1) = sum(abs(m_v(end,:)).*p);
+    end
+           
+   
+   % Select the solution has the minmum total power
+   [PT(end+1),I] = min(p_v);
+   PP(end+1,1:3)= abs(m_v(I,1:3)).*p;
+   Al(end+1,1:3) = m_v(I,1:3);
+   
+end
+
+%Power plot
+figure
+plot(t/60,PT,t/60,PP(:,1),t/60,PP(:,2),t/60,PP(:,3))
+xlabel('Time [mins]');
+ylabel('Total Power [W]');
+legend('Total Power','x power','y power','z power');
+title('Power Plot');
+
+%Actuation level plot
+figure
+plot(t/60,Al(:,1),t/60,Al(:,2),t/60,Al(:,3))
+xlabel('Time [mins]');
+ylabel('Actuation Level [Am2]');
+legend('x actuation level','y actuation','z actuation');
+title('Actuation Level Plot');
+
