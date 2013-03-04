@@ -53,6 +53,7 @@ data.models(end+1)={@AeroTDBCoWind};
 data.models(end+1)={@MagDamping};
 data.models(end+1)={@SrpTorque};
 data.models(end+1)={@MagRollControl};
+data.models(end+1)={@GravityGradient};
 
 % %Configure ConstantBC model
 % data.ConstantBCCoWind.BC=2/(0.0916*2.2);
