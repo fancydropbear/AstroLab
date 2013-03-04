@@ -19,7 +19,7 @@ function [A,T,E] = MagRollControl(t,y,data)
 %
 
 %--- Copyright notice ---%
-% Copyright 2012 Cranfield University
+% Copyright 2012-2013 Cranfield University
 % Written by Josep Virgili
 %
 % This file is part of the AstroLab
@@ -57,10 +57,10 @@ elseif lon<-180
 end
 
 %Magnetic field in T
-mfield = igrf11magm(h, lat, lon, data.MagRollControl.Y)/1e9;
-
-%--- Max torque ---%
-Tmax = abs(cross(mfield,data.MagRollControl.A));
+mfield_ECEF = igrf11magm(h, lat, lon, data.MagDamping.Y)/1e9;
+%Change magnetic field to body axes.
+DCM = quat2dcm([y(10),y(7:9)']);
+mfield = DCM*mfield_ECEF';
 
 %--- Attitude in flow reference frame ---%
 %Flow is velocity - atmosphere rotatio - wind
@@ -86,14 +86,79 @@ Rbf = Rbe*inv(Rfe);
 [r1, r2, r3] = dcm2angle(Rbf,'XYZ');
 
 %---- Torque ---%
-T=[-r1*data.MagRollControl.k;0;0];
+Tdes=[-r1*data.MagRollControl.k;0;0];
 
-%Check if desired Torque is not bigger than the max
-if T(1)>Tmax(1)
-    %Actuator saturated
-    if data.MagRollControl.verb; disp('X actuator saturating'); end;
-    T(1)=sign(T(1))*Tmax(1);
+%--- Check if torque is possible ---%
+
+%Preliminary actuation levels m_p
+m_p=(cross(mfield,Tdes)/norm(mfield)^2)';
+%Check different scalar values
+k_max=(data.MagDamping.A-m_p)./mfield'; %Scalar value for maximum actuation level on one axis
+k_min=(-data.MagDamping.A-m_p)./mfield'; %Scalar value for minus maximum actuation level on one axis
+k_0=-m_p./mfield'; %Scalar value for 0 actuation level on one axis
+
+%Scan through the different scalar values
+err=1e-3/100;
+for k=[k_max,k_min,k_0]
+    m=m_p+k*mfield';
+    
+    if abs(m(1))>data.MagDamping.A(1)*(1+err)
+        %Solution is not real
+        continue
+    end
+    if abs(m(2))>data.MagDamping.A(2)*(1+err)
+        %Solution is not real
+        continue
+    end
+    if abs(m(3))>data.MagDamping.A(3)*(1+err)
+        %Solution is not real
+        continue
+    end
+    
+    %Solution is between bounds
+    T=Tdes;
+    
+    %Acceleration (this model don't produce linear acceleration)
+    A=[0;0;0];
+    
+    %Extra state variables (this model doesn't need extra state variables)
+    E=zeros(1,length(y)-13);
+    
+    return
 end
+
+%Torque is not achievable, actuators saturate, get the nearest one.
+if data.MagRollControl.verb; disp('Magnetic torquers saturating'); end;
+
+%Scan through the different scalar values
+T_pos=[];
+T_diff=[];
+for k=[k_max,k_min,k_0]
+    m=m_p+k*mfield';
+    
+    if abs(m(1))>data.MagDamping.A(1)
+        %Adjust to maximum
+        m(1)=sign(m(1))*data.MagDamping.A(1);
+    end
+    if abs(m(2))>data.MagDamping.A(2)
+        %Adjust to maximum
+        m(2)=sign(m(2))*data.MagDamping.A(2);
+    end
+    if abs(m(3))>data.MagDamping.A(3)
+        %Adjust to maximum
+        m(3)=sign(m(3))*data.MagDamping.A(3);
+    end
+    
+    %Compute possible torque
+    T_pos(end+1,1:3)=cross(m,mfield);
+    %Compute difference to desired torque
+    T_diff(end+1)=norm(T_pos(end,:)'-Tdes);
+    
+end
+
+%Get the configuration with minimum difference
+[~,I]=min(T_diff);
+T=T_pos(I,:)';
 
 %Acceleration (this model don't produce linear acceleration)
 A=[0;0;0];
