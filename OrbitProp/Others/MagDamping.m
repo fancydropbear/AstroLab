@@ -102,7 +102,7 @@ for k=[k_max,k_min,k_0]
 end
 
 %Torque is not achievable, actuators saturate, get the nearest one.
-if data.MagRollControl.verb; disp('Magnetic torquers saturating'); end;
+if data.MadDamping.verb; disp('Magnetic torquers saturating'); end;
 
 %Scan through the different scalar values
 T_pos=[];

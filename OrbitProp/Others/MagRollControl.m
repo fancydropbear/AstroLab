@@ -57,7 +57,7 @@ elseif lon<-180
 end
 
 %Magnetic field in T
-mfield_ECEF = igrf11magm(h, lat, lon, data.MagDamping.Y)/1e9;
+mfield_ECEF = igrf11magm(h, lat, lon, data.MagRollControl.Y)/1e9;
 %Change magnetic field to body axes.
 DCM = quat2dcm([y(10),y(7:9)']);
 mfield = DCM*mfield_ECEF';
@@ -93,8 +93,8 @@ Tdes=[-r1*data.MagRollControl.k;0;0];
 %Preliminary actuation levels m_p
 m_p=(cross(mfield,Tdes)/norm(mfield)^2)';
 %Check different scalar values
-k_max=(data.MagDamping.A-m_p)./mfield'; %Scalar value for maximum actuation level on one axis
-k_min=(-data.MagDamping.A-m_p)./mfield'; %Scalar value for minus maximum actuation level on one axis
+k_max=(data.MagRollControl.A-m_p)./mfield'; %Scalar value for maximum actuation level on one axis
+k_min=(-data.MagRollControl.A-m_p)./mfield'; %Scalar value for minus maximum actuation level on one axis
 k_0=-m_p./mfield'; %Scalar value for 0 actuation level on one axis
 
 %Scan through the different scalar values
@@ -102,15 +102,15 @@ err=1e-3/100;
 for k=[k_max,k_min,k_0]
     m=m_p+k*mfield';
     
-    if abs(m(1))>data.MagDamping.A(1)*(1+err)
+    if abs(m(1))>data.MagRollControl.A(1)*(1+err)
         %Solution is not real
         continue
     end
-    if abs(m(2))>data.MagDamping.A(2)*(1+err)
+    if abs(m(2))>data.MagRollControl.A(2)*(1+err)
         %Solution is not real
         continue
     end
-    if abs(m(3))>data.MagDamping.A(3)*(1+err)
+    if abs(m(3))>data.MagRollControl.A(3)*(1+err)
         %Solution is not real
         continue
     end
@@ -136,17 +136,17 @@ T_diff=[];
 for k=[k_max,k_min,k_0]
     m=m_p+k*mfield';
     
-    if abs(m(1))>data.MagDamping.A(1)
+    if abs(m(1))>data.MagRollControl.A(1)
         %Adjust to maximum
-        m(1)=sign(m(1))*data.MagDamping.A(1);
+        m(1)=sign(m(1))*data.MagRollControl.A(1);
     end
-    if abs(m(2))>data.MagDamping.A(2)
+    if abs(m(2))>data.MagRollControl.A(2)
         %Adjust to maximum
-        m(2)=sign(m(2))*data.MagDamping.A(2);
+        m(2)=sign(m(2))*data.MagRollControl.A(2);
     end
-    if abs(m(3))>data.MagDamping.A(3)
+    if abs(m(3))>data.MagRollControl.A(3)
         %Adjust to maximum
-        m(3)=sign(m(3))*data.MagDamping.A(3);
+        m(3)=sign(m(3))*data.MagRollControl.A(3);
     end
     
     %Compute possible torque
