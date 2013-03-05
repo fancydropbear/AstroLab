@@ -40,9 +40,9 @@ w0=[0,deg2rad(-360/90/60),0]; %Initial angular rate
 x0=[x0,q0,w0];
 
 %Spacecarft propetries
-data.sc_prop.I=[0.0033,0,0;
-                0,0.0083,0;
-                0,0,0.0083]; %Inertia
+data.sc_prop.I=[0.04,0,0;
+                0,0.0177,0;
+                0,0,0.0177]; %Inertia
             
 %Models
 data.models={@GravJ4};
