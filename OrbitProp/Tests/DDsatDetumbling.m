@@ -1,22 +1,44 @@
 % DDsatDetumbling is a test script for OrbitProp
 %
 % In this case this example shows a detumbling example for DDsat using
-% magnetic torquers
+% magnetic torquers and gyroscope.
+% Reminder: This is not a typical way for detumbling (different from Bdot
+% Method). However, the reason this test has to be carried out is that we
+% want to gain a basic and initial idea about the duration for detumbling.
+
+%--- Copyright notice ---%
+% Copyright 2012-2013 Cranfield University
+% Written by Josep Virgili and Daniel Zhou Hao
+%
+% This file is part of the AstroLab
+%
+% AstroLab is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% AstroLab is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with AstroLab.  If not, see <http://www.gnu.org/licenses/>.
 
 %--- CODE ---%
-
 %Clean up
-clc
-clear all
 close all
+%For statistics, remove clear; and clc;
+clear;
+clc;
 
 %Add paths
 addpath('..')
+addpath('IGRF')
 OrbitToPath
 
 %--- Initial state vector and model configuration ---%
 %Earth parameters
-
 
 Re = 6378136.49; %Equatorial Earth radius m [source: SMAD 3rd edition]
 mu=398600.441e9;  %GM Earth m3/s2 [source: SMAD 3rd edition]
@@ -30,7 +52,7 @@ x0 = [Re+h,0,0,0,v0*cosd(i),v0*sind(i)]; %Initial vector state
 %Atmosphere co-rotation velocity
 Vco = norm(cross([0;0;we],x0(1:3))); 
 
-tf = 0:1:15 * 60; %Integration time
+tf = 0:1:25 * 60; %Integration time
 rx=deg2rad(rand()*360);
 ry=deg2rad(rand()*360);
 rz=deg2rad(rand()*360);
@@ -45,10 +67,15 @@ w0=deg2rad([w1,w2,w3]); %Format initial angular rate
 %Format the initial 
 x0=[x0,q0,w0];
 
+% Spacecarft propetries
+% data.sc_prop.I=[0.0042,0,0;
+%                 0,0.0104,0;
+%                 0,0,0.0104]; %Inertia
+ 
 %Spacecarft propetries
-data.sc_prop.I=[0.0042,0,0;
-                0,0.0104,0;
-                0,0,0.0104]; %Inertia
+data.sc_prop.I=[0.04,0,0;
+                0,0.0177,0;
+                0,0,0.0177]; %Inertia
             
 %Models
 data.models={@GravJ4};
