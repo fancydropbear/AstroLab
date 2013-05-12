@@ -70,9 +70,9 @@ x0=[x0,q0,w0];
 %                 0,0.0083,0;
 %                 0,0,0.0083]; %Old Inertia
 
-data.sc_prop.I=[0.04,0,0;
-                0,0.0177,0;
-                0,0,0.0177]; %Updated Inertia
+data.sc_prop.I=[0.0049 ,0,0;
+                0,0.0111 ,0;
+                0,0, 0.0111]; %Updated Inertia
 
             
 %Aerodynamic databases
