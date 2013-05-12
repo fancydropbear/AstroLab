@@ -43,9 +43,10 @@ w0=[0,deg2rad(-360/90/60),0]; %Initial angular rate
 x0=[x0,q0,w0];
 
 %Spacecarft propetries
-data.sc_prop.I=[0.04,0,0;
-                0,0.0177,0;
-                0,0,0.0177]; %Inertia
+
+data.sc_prop.I=[0.0049 ,0,0;
+                0,0.0111,0;
+                0,0,0.0111]; %Inertia
             
 %Aerodynamic databases
 rolldb_FP = 'AeroDB/Counter/pmz-45pmy0/F_roll_pmz-45_pmy0.mat';
@@ -79,7 +80,7 @@ data.AeroFDBCoWind.rolldb=FP_rolldb.F_roll;
 data.AeroFDBCoWind.pitchdb=FP_pitchdb.F_pitch;
 data.AeroFDBCoWind.yawdb=FP_yawdb.F_yaw;
 data.AeroFDBCoWind.atmos_model=@nrlmsise00;
-data.AeroFDBCoWind.wind_model=@WindHWM93;
+data.AeroFDBCoWind.wind_model=@NoWind;
 data.AeroFDBCoWind.mass=2;
 data.AeroFDBCoWind.CfA0=[FP_rolldb.F_roll(1,2);FP_rolldb.F_roll(1,3);FP_rolldb.F_roll(1,4)];
 
@@ -101,7 +102,7 @@ data.AeroTDBCoWind.rolldb = TP_rolldb.T_roll;
 data.AeroTDBCoWind.pitchdb = TP_pitchdb.T_pitch;
 data.AeroTDBCoWind.yawdb = TP_yawdb.T_yaw;
 data.AeroTDBCoWind.atmos_model=@nrlmsise00;
-data.AeroTDBCoWind.wind_model=@WindHWM93;
+data.AeroTDBCoWind.wind_model=@NoWind;
 data.AeroTDBCoWind.CfA0l0=[TP_rolldb.T_roll(1,2);TP_rolldb.T_roll(1,3);TP_rolldb.T_roll(1,4)];
 
 %Configure WindHWM93
@@ -126,7 +127,7 @@ data.SrpTorque.Alr = [0,0,0;
 data.MagRollControl.A = [0.2,0.2,0.2];
 data.MagRollControl.Y = 2012;
 data.MagRollControl.k = 2e-4;
-data.MagRollControl.wind_model=@WindHWM93;
+data.MagRollControl.wind_model=@NoWind;
 data.MagRollControl.verb = 0;
 
 %--- Integrate ---%
