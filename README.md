@@ -21,7 +21,7 @@ AstroLab is an open source project that needs your contributions. Feel free to f
 ## Legal Boring Stuff
 
 Copyright 2012-2013 Cranfield University
-Written by Josep Virgili (Orbital Propogator and Disturbances Database), Daniel Zhou Hao (B-dot Controller and CubeSat Dyanmics)
+Written by Josep Virgili (Orbital Propogator and Disturbance Models and Database), Daniel Zhou Hao (B-dot Controller and CubeSat Dynamics)
 
 This file is part of the AstroLab toolkit
 
